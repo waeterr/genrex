@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 
+import { createProject, type CreateOptions } from "./create.js";
 import { blueprints, getBlueprint } from "./blueprints.js";
 
 const [command, ...args] = process.argv.slice(2);
 
 switch (command) {
+  case "create":
+    runCreate(args);
+    break;
   case "list":
     listBlueprints();
     break;
@@ -24,6 +28,34 @@ switch (command) {
     console.error(`Unknown command: ${command}`);
     console.error("Run 'genrex --help' for usage.");
     process.exitCode = 1;
+}
+
+function runCreate(args: string[]): void {
+  const [name, ...flags] = args;
+  const options: CreateOptions = { dryRun: false };
+
+  for (let index = 0; index < flags.length; index += 1) {
+    const flag = flags[index];
+    if (flag === "--dry-run") {
+      options.dryRun = true;
+    } else if (flag === "--blueprint") {
+      options.blueprint = flags[++index];
+    } else if (flag === "--package-manager") {
+      const packageManager = flags[++index];
+      if (!["npm", "pnpm", "yarn", "bun"].includes(packageManager)) {
+        console.error(`Error: Unsupported package manager '${packageManager}'.`);
+        process.exitCode = 1;
+        return;
+      }
+      options.packageManager = packageManager as CreateOptions["packageManager"];
+    } else {
+      console.error(`Error: Unknown create option '${flag}'.`);
+      process.exitCode = 1;
+      return;
+    }
+  }
+
+  createProject(name, options);
 }
 
 function listBlueprints(): void {
@@ -65,12 +97,17 @@ Usage:
   genrex <command> [options]
 
 Commands:
-  list           List available blueprints
-  info <name>    Show blueprint details
-  create [name]  Create a project
-  doctor         Check local environment
+  list                              List available blueprints
+  info <name>                       Show blueprint details
+  create <name> --dry-run           Preview project generation
+  doctor                            Check local environment
+
+Create options:
+  --blueprint <id>                  Blueprint ID (default: ts-cli)
+  --package-manager <manager>       npm, pnpm, yarn, or bun (default: pnpm)
+  --dry-run                         Preview without filesystem changes
 
 Options:
-  -h, --help     Show help
-  -v, --version  Show version`);
+  -h, --help                        Show help
+  -v, --version                     Show version`);
 }
