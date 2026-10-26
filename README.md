@@ -8,5 +8,5 @@ Project Blueprint Engine.
 npm install
 npm run check
 npm run build
-node dist/index.js --help
+node dist/src/index.js --help
 ```
