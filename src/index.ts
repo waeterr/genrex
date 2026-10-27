@@ -32,12 +32,14 @@ switch (command) {
 
 function runCreate(args: string[]): void {
   const [name, ...flags] = args;
-  const options: CreateOptions = { dryRun: false };
+  const options: CreateOptions = { dryRun: false, skipInstall: false };
 
   for (let index = 0; index < flags.length; index += 1) {
     const flag = flags[index];
     if (flag === "--dry-run") {
       options.dryRun = true;
+    } else if (flag === "--skip-install") {
+      options.skipInstall = true;
     } else if (flag === "--blueprint") {
       options.blueprint = flags[++index];
     } else if (flag === "--package-manager") {
@@ -106,6 +108,7 @@ Create options:
   --blueprint <id>                  Blueprint ID (default: ts-cli)
   --package-manager <manager>       npm, pnpm, yarn, or bun (default: pnpm)
   --dry-run                         Preview without filesystem changes
+  --skip-install                    Do not install dependencies
 
 Options:
   -h, --help                        Show help
