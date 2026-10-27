@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { createProject, type CreateOptions } from "./create.js";
+import { runDoctor } from "./doctor.js";
 import { blueprints, getBlueprint } from "./blueprints.js";
 
 const [command, ...args] = process.argv.slice(2);
@@ -14,6 +15,9 @@ switch (command) {
     break;
   case "info":
     showBlueprintInfo(args[0]);
+    break;
+  case "doctor":
+    runDoctor();
     break;
   case "--help":
   case "-h":
