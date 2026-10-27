@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { ProjectConfig } from "./config.js";
+import { generateCiWorkflow } from "./ci.js";
 
 export interface GeneratedFile {
   path: string;
@@ -19,7 +20,7 @@ export function prepareDestination(destination: string): void {
 }
 
 export function buildTsCliFiles(config: ProjectConfig): GeneratedFile[] {
-  return [
+  const files: GeneratedFile[] = [
     {
       path: "package.json",
       content: JSON.stringify(
@@ -132,6 +133,15 @@ test("smoke test", () => {
 `,
     },
   ];
+
+  if (config.githubActions) {
+    files.push({
+      path: ".github/workflows/ci.yml",
+      content: generateCiWorkflow(config.packageManager),
+    });
+  }
+
+  return files;
 }
 
 export function writeProjectFiles(destination: string, files: GeneratedFile[]): void {

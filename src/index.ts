@@ -36,7 +36,7 @@ switch (command) {
 
 function runCreate(args: string[]): void {
   const [name, ...flags] = args;
-  const options: CreateOptions = { dryRun: false, skipInstall: false, git: false };
+  const options: CreateOptions = { dryRun: false, skipInstall: false, git: false, githubActions: false };
 
   for (let index = 0; index < flags.length; index += 1) {
     const flag = flags[index];
@@ -46,6 +46,8 @@ function runCreate(args: string[]): void {
       options.skipInstall = true;
     } else if (flag === "--git") {
       options.git = true;
+    } else if (flag === "--github-actions") {
+      options.githubActions = true;
     } else if (flag === "--blueprint") {
       options.blueprint = flags[++index];
     } else if (flag === "--package-manager") {
@@ -116,6 +118,7 @@ Create options:
   --dry-run                         Preview without filesystem changes
   --skip-install                    Do not install dependencies
   --git                             Initialize a Git repository
+  --github-actions                  Generate GitHub Actions CI workflow
 
 Options:
   -h, --help                        Show help

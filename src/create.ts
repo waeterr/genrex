@@ -19,6 +19,7 @@ export interface CreateOptions {
   dryRun: boolean;
   skipInstall: boolean;
   git: boolean;
+  githubActions: boolean;
 }
 
 export function createProject(name: string | undefined, options: CreateOptions): void {
@@ -35,7 +36,7 @@ export function createProject(name: string | undefined, options: CreateOptions):
     testing: "vitest",
     formatter: "biome",
     git: options.git,
-    githubActions: false,
+    githubActions: options.githubActions,
     docker: false,
   };
   const errors = validateConfig(config);
@@ -71,6 +72,7 @@ export function createProject(name: string | undefined, options: CreateOptions):
     console.log(`Destination:     ${config.destination}`);
     console.log(`Package manager: ${config.packageManager}`);
     console.log(`Git:             ${options.git ? "yes" : "no"}`);
+    console.log(`GitHub Actions:  ${options.githubActions ? "yes" : "no"}`);
     console.log("\nWould create:");
     for (const f of files) {
       console.log(`  - ${f.path}`);
