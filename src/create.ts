@@ -10,6 +10,7 @@ import {
   prepareDestination,
   writeProjectFiles,
 } from "./generator.js";
+import { checkGit, initGit } from "./git.js";
 import { installDependencies } from "./pm.js";
 
 export interface CreateOptions {
@@ -17,6 +18,7 @@ export interface CreateOptions {
   packageManager?: PackageManager;
   dryRun: boolean;
   skipInstall: boolean;
+  git: boolean;
 }
 
 export function createProject(name: string | undefined, options: CreateOptions): void {
@@ -32,7 +34,7 @@ export function createProject(name: string | undefined, options: CreateOptions):
     packageManager: options.packageManager ?? "pnpm",
     testing: "vitest",
     formatter: "biome",
-    git: false,
+    git: options.git,
     githubActions: false,
     docker: false,
   };
@@ -55,17 +57,30 @@ export function createProject(name: string | undefined, options: CreateOptions):
 
   const files = buildTsCliFiles(config);
 
+  if (options.git) {
+    const gitStatus = checkGit();
+    if (!gitStatus.available) {
+      fail("Git was requested (--git), but 'git' is not installed or not in PATH.");
+      return;
+    }
+  }
+
   if (options.dryRun) {
     console.log("DRY RUN\n");
     console.log(`Blueprint:       ${blueprint.name}`);
     console.log(`Destination:     ${config.destination}`);
     console.log(`Package manager: ${config.packageManager}`);
+    console.log(`Git:             ${options.git ? "yes" : "no"}`);
     console.log("\nWould create:");
     for (const f of files) {
       console.log(`  - ${f.path}`);
     }
     console.log("\nWould install:");
     console.log("  devDependencies: typescript, vitest, @biomejs/biome, @types/node");
+    if (options.git) {
+      console.log("\nWould execute:");
+      console.log("  git init");
+    }
     return;
   }
 
@@ -80,6 +95,12 @@ export function createProject(name: string | undefined, options: CreateOptions):
       console.log(`Installing dependencies using ${config.packageManager}...`);
       installDependencies(config.packageManager, config.destination);
       console.log("✓ Dependencies installed");
+    }
+
+    if (options.git) {
+      console.log("Initializing Git repository...");
+      initGit(config.destination);
+      console.log("✓ Git repository initialized");
     }
 
     console.log("\nDone. Next steps:");

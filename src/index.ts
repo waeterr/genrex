@@ -32,7 +32,7 @@ switch (command) {
 
 function runCreate(args: string[]): void {
   const [name, ...flags] = args;
-  const options: CreateOptions = { dryRun: false, skipInstall: false };
+  const options: CreateOptions = { dryRun: false, skipInstall: false, git: false };
 
   for (let index = 0; index < flags.length; index += 1) {
     const flag = flags[index];
@@ -40,6 +40,8 @@ function runCreate(args: string[]): void {
       options.dryRun = true;
     } else if (flag === "--skip-install") {
       options.skipInstall = true;
+    } else if (flag === "--git") {
+      options.git = true;
     } else if (flag === "--blueprint") {
       options.blueprint = flags[++index];
     } else if (flag === "--package-manager") {
@@ -109,6 +111,7 @@ Create options:
   --package-manager <manager>       npm, pnpm, yarn, or bun (default: pnpm)
   --dry-run                         Preview without filesystem changes
   --skip-install                    Do not install dependencies
+  --git                             Initialize a Git repository
 
 Options:
   -h, --help                        Show help
