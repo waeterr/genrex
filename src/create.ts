@@ -9,7 +9,9 @@ import {
   buildTsCliFiles,
   prepareDestination,
   writeProjectFiles,
+  type GeneratedFile,
 } from "./generator.js";
+import { buildNodeApiFiles } from "./generators/node-api.js";
 import { checkGit, initGit } from "./git.js";
 import { installDependencies } from "./pm.js";
 
@@ -51,12 +53,15 @@ export function createProject(name: string | undefined, options: CreateOptions):
     return;
   }
 
-  if (config.blueprint !== "ts-cli") {
-    fail(`Generation for blueprint '${config.blueprint}' is not implemented yet. Supported: ts-cli.`);
+  let files: GeneratedFile[];
+  if (config.blueprint === "ts-cli") {
+    files = buildTsCliFiles(config);
+  } else if (config.blueprint === "node-api") {
+    files = buildNodeApiFiles(config);
+  } else {
+    fail(`Generation for blueprint '${config.blueprint}' is not implemented yet. Supported: ts-cli, node-api.`);
     return;
   }
-
-  const files = buildTsCliFiles(config);
 
   if (options.git) {
     const gitStatus = checkGit();
