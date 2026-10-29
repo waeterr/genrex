@@ -12,6 +12,7 @@ import {
   type GeneratedFile,
 } from "./generator.js";
 import { buildNodeApiFiles } from "./generators/node-api.js";
+import { buildTsLibFiles } from "./generators/ts-lib.js";
 import { checkGit, initGit } from "./git.js";
 import { installDependencies } from "./pm.js";
 
@@ -58,8 +59,10 @@ export function createProject(name: string | undefined, options: CreateOptions):
     files = buildTsCliFiles(config);
   } else if (config.blueprint === "node-api") {
     files = buildNodeApiFiles(config);
+  } else if (config.blueprint === "ts-lib") {
+    files = buildTsLibFiles(config);
   } else {
-    fail(`Generation for blueprint '${config.blueprint}' is not implemented yet. Supported: ts-cli, node-api.`);
+    fail(`Generation for blueprint '${config.blueprint}' is not implemented yet. Supported: ts-cli, node-api, ts-lib.`);
     return;
   }
 
