@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { ProjectConfig } from "./config.js";
 import { generateCiWorkflow } from "./ci.js";
+import { generateDockerfile, generateDockerignore } from "./docker.js";
 
 export interface GeneratedFile {
   path: string;
@@ -139,6 +140,19 @@ test("smoke test", () => {
       path: ".github/workflows/ci.yml",
       content: generateCiWorkflow(config.packageManager),
     });
+  }
+
+  if (config.docker) {
+    files.push(
+      {
+        path: "Dockerfile",
+        content: generateDockerfile(config),
+      },
+      {
+        path: ".dockerignore",
+        content: generateDockerignore(),
+      },
+    );
   }
 
   return files;

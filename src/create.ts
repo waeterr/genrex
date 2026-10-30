@@ -23,6 +23,7 @@ export interface CreateOptions {
   skipInstall: boolean;
   git: boolean;
   githubActions: boolean;
+  docker: boolean;
 }
 
 export function createProject(name: string | undefined, options: CreateOptions): void {
@@ -40,7 +41,7 @@ export function createProject(name: string | undefined, options: CreateOptions):
     formatter: "biome",
     git: options.git,
     githubActions: options.githubActions,
-    docker: false,
+    docker: options.docker,
   };
   const errors = validateConfig(config);
   const blueprint = getBlueprint(config.blueprint);
@@ -81,6 +82,7 @@ export function createProject(name: string | undefined, options: CreateOptions):
     console.log(`Package manager: ${config.packageManager}`);
     console.log(`Git:             ${options.git ? "yes" : "no"}`);
     console.log(`GitHub Actions:  ${options.githubActions ? "yes" : "no"}`);
+    console.log(`Docker:          ${options.docker ? "yes" : "no"}`);
     console.log("\nWould create:");
     for (const f of files) {
       console.log(`  - ${f.path}`);

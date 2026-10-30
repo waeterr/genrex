@@ -1,6 +1,7 @@
 import type { ProjectConfig } from "../config.js";
 import type { GeneratedFile } from "../generator.js";
 import { generateCiWorkflow } from "../ci.js";
+import { generateDockerfile, generateDockerignore } from "../docker.js";
 
 export function buildNodeApiFiles(config: ProjectConfig): GeneratedFile[] {
   const files: GeneratedFile[] = [
@@ -145,6 +146,19 @@ test("example test", () => {
       path: ".github/workflows/ci.yml",
       content: generateCiWorkflow(config.packageManager),
     });
+  }
+
+  if (config.docker) {
+    files.push(
+      {
+        path: "Dockerfile",
+        content: generateDockerfile(config),
+      },
+      {
+        path: ".dockerignore",
+        content: generateDockerignore(),
+      },
+    );
   }
 
   return files;
