@@ -38,5 +38,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "genrex": "^0.1.0"
   }
 }

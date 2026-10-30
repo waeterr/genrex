@@ -11,95 +11,200 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.2.0-blue?style=flat-square" alt="Version" />
+  <a href="https://www.npmjs.com/package/genrex"><img src="https://img.shields.io/npm/v/genrex?style=flat-square&color=cb3837" alt="npm version" /></a>
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" />
+  <img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square" alt="Node version" />
 </p>
 
 > **Forge production-ready projects from configurable blueprints.**
 
-`genrex` is a modern, lightweight project scaffolding CLI engine. Rather than copying generic boilerplates, it generates strongly-typed, coherent software projects with Biome, Vitest, CI/CD, and Docker support tailored to your stack.
+`genrex` is a modern, lightweight CLI scaffolding engine. Rather than copying bare-bones or obsolete boilerplates, it generates strictly-typed, coherent software projects equipped with modern standards: **Biome**, **Vitest**, native ESM, **GitHub Actions CI**, and multi-stage **Dockerfiles**.
 
 ---
 
-## Tech Stack & Ecosystem
+## ⚡ Installation & Execution
 
-- **Language & Runtime:** TypeScript (Strict, Native ESM), Node.js (>=20)
-- **Code Quality & Testing:** Biome (Format/Lint), Vitest
-- **API Framework:** Fastify + `tsx` hot-reload
-- **DevOps & Containers:** Multi-stage Docker, GitHub Actions CI
-- **Package Managers:** `pnpm`, `npm`, `yarn`, `bun`
+You have two ways to run `genrex`:
 
----
+### 1. One-Time Run (Recommended — No Install Needed)
 
-## Quick Start
-
-Run directly with `npx`:
+Run the latest version instantly using `npx`:
 
 ```bash
-npx genrex create my-api --blueprint node-api
+npx genrex create
 ```
 
-Preview what will be generated without writing to disk:
+Or target a specific name directly:
 
 ```bash
-npx genrex create my-cli --dry-run
+npx genrex create my-app
 ```
 
 ---
 
-## Blueprints
+### 2. Global Installation
 
-| Blueprint | ID | Description |
-|---|---|---|
-| **TypeScript CLI** | `ts-cli` | Standalone CLI binary, ESM, Biome formatting, Vitest |
-| **Node.js API** | `node-api` | Fastify REST API, hot-reload (`tsx`), healthchecks |
-| **TypeScript Library** | `ts-lib` | Publishable library with dual ESM exports and `.d.ts` declaration maps |
-
-View all blueprints anytime:
+If you frequently scaffold new projects, install `genrex` globally:
 
 ```bash
-genrex list
-genrex info ts-cli
+# Using npm
+npm install -g genrex
+
+# Using pnpm
+pnpm add -g genrex
+
+# Using yarn
+yarn global add genrex
+
+# Using bun
+bun add -g genrex
+```
+
+Once installed, use the `genrex` command anywhere:
+
+```bash
+genrex create
 ```
 
 ---
 
-## Commands & Usage
+## 🎯 Interactive Wizard Mode
 
-### 1. Create a Project
+Running `genrex create` without options launches an interactive step-by-step setup wizard:
 
-```bash
-genrex create <project-name> [options]
+```text
+genrex — Project Blueprint Engine
+
+? Project name: my-fastify-api
+
+? Choose a blueprint:
+  1) TypeScript CLI         (ts-cli)
+  2) Node.js API            (node-api)
+  3) TypeScript Library     (ts-lib)
+Select [1-3] (1): 2
+
+? Package manager:
+  1) pnpm
+  2) npm
+  3) yarn
+  4) bun
+Select [1-4] (1): 1
+
+? Initialize Git? (Y/n): y
+? Add GitHub Actions CI? (y/N): y
+? Add Docker? (y/N): y
+
+✓ Project scaffolded in /path/to/my-fastify-api
+Installing dependencies using pnpm...
+✓ Dependencies installed
+Initializing Git repository...
+✓ Git repository initialized
+
+Done. Next steps:
+  cd my-fastify-api
+  pnpm run dev
+  pnpm test
 ```
 
-**Options:**
+---
+
+## 📖 Complete Command Reference
+
+| Command | Description |
+|---|---|
+| `genrex create [name]` | Scaffold a new project (interactive wizard by default) |
+| `genrex list` | Show all available blueprints and descriptions |
+| `genrex info <id>` | Inspect detailed metadata & capabilities of a blueprint |
+| `genrex doctor` | Audit local development environment tools and versions |
+| `genrex -v, --version` | Output current CLI version |
+| `genrex -h, --help` | Display command usage and option flags |
+
+---
+
+### 1. `genrex create [name] [options]`
+
+Scaffold a project. You can skip interactive prompts entirely using flags (ideal for CI/automation scripts).
+
+#### Command Flags:
 
 | Flag | Description | Default |
 |---|---|---|
-| `--blueprint <id>` | Blueprint template (`ts-cli`, `node-api`, `ts-lib`) | `ts-cli` |
+| `-i, --interactive` | Force interactive wizard even if name is supplied | `false` |
+| `--blueprint <id>` | Target blueprint: `ts-cli`, `node-api`, or `ts-lib` | `ts-cli` |
 | `--package-manager <pm>` | `npm`, `pnpm`, `yarn`, or `bun` | `pnpm` |
 | `--git` | Initialize empty Git repository | `false` |
-| `--github-actions` | Generate GitHub Actions CI test/lint workflow | `false` |
-| `--docker` | Generate optimized multi-stage Dockerfile | `false` |
-| `--dry-run` | Preview file tree and dependencies without writing files | `false` |
-| `--skip-install` | Scaffold files without running package installation | `false` |
+| `--github-actions` | Generate `.github/workflows/ci.yml` CI workflow | `false` |
+| `--docker` | Generate multi-stage `Dockerfile` and `.dockerignore` | `false` |
+| `--dry-run` | Preview files and packages without writing to disk | `false` |
+| `--skip-install` | Scaffold files without executing package manager install | `false` |
 
-**Full-fledged Example:**
+#### Non-Interactive Examples:
 
 ```bash
-genrex create billing-service \
-  --blueprint node-api \
-  --package-manager pnpm \
-  --git \
-  --github-actions \
-  --docker
+# Preview what would be created without writing any files
+genrex create my-tool --blueprint ts-cli --dry-run
+
+# Node.js API with pnpm, Git, and GitHub Actions
+genrex create backend-service --blueprint node-api --package-manager pnpm --git --github-actions
+
+# Lightweight library without waiting for dependency installation
+genrex create math-utils --blueprint ts-lib --skip-install
+
+# Full-stack microservice with Docker containerization
+genrex create auth-service --blueprint node-api --docker --github-actions --git
 ```
 
 ---
 
-### 2. Environment Doctor
+### 2. `genrex list`
 
-Diagnose your environment tools in one command:
+List all built-in blueprint architectures:
+
+```bash
+genrex list
+```
+
+```text
+Available blueprints:
+
+  ts-cli       TypeScript CLI (TypeScript)
+               Production-ready TypeScript CLI tool.
+
+  node-api     Node.js API (TypeScript)
+               Node.js REST API with routing and healthchecks.
+
+  ts-lib       TypeScript Library (TypeScript)
+               Publishable TypeScript library blueprint.
+```
+
+---
+
+### 3. `genrex info <blueprint-id>`
+
+Inspect capabilities and metadata of any blueprint:
+
+```bash
+genrex info node-api
+```
+
+```text
+Node.js API (node-api)
+Version:      1.0.0
+Language:     TypeScript
+Description:  Node.js REST API with routing and healthchecks.
+Capabilities:
+  - testing
+  - formatting
+  - git
+  - github-actions
+  - docker
+```
+
+---
+
+### 4. `genrex doctor`
+
+Audit your machine's environment and ensure required developer tools are installed:
 
 ```bash
 genrex doctor
@@ -122,27 +227,86 @@ Environment is ready.
 
 ---
 
-## Design Principles
+## 🏗️ Available Blueprints & Project Structures
 
-- **Zero Unnecessary Bloat:** Fast execution with near-zero runtime dependencies.
-- **Fail Safely:** Refuses to overwrite non-empty directories; pre-validates all input and tools before modifying the disk.
-- **Modern Standards:** Native ESM, strict TypeScript, Biome linter/formatter, and Vitest by default.
-- **Cross-Platform:** Works seamlessly on Windows, macOS, and Linux.
+### 1. TypeScript CLI (`ts-cli`)
+Tailored for building standalone developer tools and CLI applications.
+```text
+my-cli/
+├── src/
+│   └── index.ts          # Executable binary entry point with shebang
+├── tests/
+│   └── index.test.ts     # Vitest unit test suite
+├── .gitignore
+├── biome.json            # High-performance linter & formatter
+├── package.json          # Configured with "bin" field and ESM
+├── tsconfig.json         # Strict NodeNext configuration
+└── README.md
+```
+
+### 2. Node.js API (`node-api`)
+Production-ready REST API built with Fastify.
+```text
+my-api/
+├── src/
+│   └── server.ts         # Fastify server with /health route
+├── tests/
+│   └── server.test.ts    # Vitest route testing
+├── .gitignore
+├── biome.json
+├── package.json          # Development with "tsx watch" hot-reload
+├── tsconfig.json
+└── README.md
+```
+
+### 3. TypeScript Library (`ts-lib`)
+Ready for distribution on npm with dual type declarations.
+```text
+my-lib/
+├── src/
+│   └── index.ts          # Library exports
+├── tests/
+│   └── index.test.ts     # Vitest test suite
+├── .gitignore
+├── .npmignore            # Keeps source and tests out of npm tarball
+├── biome.json
+├── package.json          # "exports", "main", "types", "prepublishOnly"
+├── tsconfig.json         # Generates declaration maps (.d.ts)
+└── README.md
+```
 
 ---
 
-## Development
+## 🛡️ Safety & Core Philosophy
+
+- **Zero Accidental Overwriting:** Refuses to generate files inside non-empty folders.
+- **Shell Injection Safe:** Child processes use direct executable arguments (`shell: false`) rather than concatenated shell strings.
+- **Fail Fast:** Project names, blueprint availability, and Git binary presence are validated before modifying the filesystem.
+- **Zero Heavy Runtime Dependencies:** Blazing fast execution using native Node.js APIs (`node:readline/promises`, `node:child_process`, `node:fs`).
+
+---
+
+## 💻 Development & Contributing
+
+Want to add new blueprints or improve the CLI?
 
 ```bash
+# Clone the repository
 git clone https://github.com/waeterr/genrex.git
 cd genrex
+
+# Install dev dependencies
 npm install
+
+# Run automated tests (native Node test runner + TypeScript strip)
 npm test
+
+# Build TypeScript to dist/
 npm run build
 ```
 
 ---
 
-## License
+## 📄 License
 
 MIT © [waeterr](https://github.com/waeterr)
