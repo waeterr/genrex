@@ -15,6 +15,7 @@ import { buildNodeApiFiles } from "./generators/node-api.js";
 import { buildTsLibFiles } from "./generators/ts-lib.js";
 import { checkGit, initGit } from "./git.js";
 import { installDependencies } from "./pm.js";
+import { promptWizard } from "./prompt.js";
 
 export interface CreateOptions {
   blueprint?: string;
@@ -24,24 +25,42 @@ export interface CreateOptions {
   git: boolean;
   githubActions: boolean;
   docker: boolean;
+  interactive?: boolean;
 }
 
-export function createProject(name: string | undefined, options: CreateOptions): void {
-  if (!name) {
+export async function createProject(name: string | undefined, options: CreateOptions): Promise<void> {
+  let targetName = name;
+  let targetBlueprint = options.blueprint ?? "ts-cli";
+  let targetPm = options.packageManager ?? "pnpm";
+  let targetGit = options.git;
+  let targetCi = options.githubActions;
+  let targetDocker = options.docker;
+
+  if ((!targetName || options.interactive) && process.stdin.isTTY) {
+    const answers = await promptWizard(targetName);
+    targetName = answers.name;
+    targetBlueprint = answers.blueprint;
+    targetPm = answers.packageManager;
+    targetGit = answers.git;
+    targetCi = answers.githubActions;
+    targetDocker = answers.docker;
+  }
+
+  if (!targetName) {
     fail("Project name is required. Example: genrex create my-project");
     return;
   }
 
   const config: ProjectConfig = {
-    name: basename(name),
-    destination: resolve(name),
-    blueprint: options.blueprint ?? "ts-cli",
-    packageManager: options.packageManager ?? "pnpm",
+    name: basename(targetName),
+    destination: resolve(targetName),
+    blueprint: targetBlueprint,
+    packageManager: targetPm,
     testing: "vitest",
     formatter: "biome",
-    git: options.git,
-    githubActions: options.githubActions,
-    docker: options.docker,
+    git: targetGit,
+    githubActions: targetCi,
+    docker: targetDocker,
   };
   const errors = validateConfig(config);
   const blueprint = getBlueprint(config.blueprint);
@@ -80,16 +99,16 @@ export function createProject(name: string | undefined, options: CreateOptions):
     console.log(`Blueprint:       ${blueprint.name}`);
     console.log(`Destination:     ${config.destination}`);
     console.log(`Package manager: ${config.packageManager}`);
-    console.log(`Git:             ${options.git ? "yes" : "no"}`);
-    console.log(`GitHub Actions:  ${options.githubActions ? "yes" : "no"}`);
-    console.log(`Docker:          ${options.docker ? "yes" : "no"}`);
+    console.log(`Git:             ${config.git ? "yes" : "no"}`);
+    console.log(`GitHub Actions:  ${config.githubActions ? "yes" : "no"}`);
+    console.log(`Docker:          ${config.docker ? "yes" : "no"}`);
     console.log("\nWould create:");
     for (const f of files) {
       console.log(`  - ${f.path}`);
     }
     console.log("\nWould install:");
     console.log("  devDependencies: typescript, vitest, @biomejs/biome, @types/node");
-    if (options.git) {
+    if (config.git) {
       console.log("\nWould execute:");
       console.log("  git init");
     }
@@ -109,14 +128,14 @@ export function createProject(name: string | undefined, options: CreateOptions):
       console.log("✓ Dependencies installed");
     }
 
-    if (options.git) {
+    if (config.git) {
       console.log("Initializing Git repository...");
       initGit(config.destination);
       console.log("✓ Git repository initialized");
     }
 
     console.log("\nDone. Next steps:");
-    console.log(`  cd ${name}`);
+    console.log(`  cd ${targetName}`);
     if (options.skipInstall) {
       console.log(`  ${config.packageManager} install`);
     }

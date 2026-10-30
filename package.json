@@ -1,17 +1,36 @@
 {
   "name": "genrex",
-  "version": "0.1.0",
-  "description": "Project blueprint engine",
+  "version": "0.2.0",
+  "description": "Forge production-ready TypeScript projects from blueprints",
   "license": "MIT",
   "type": "module",
+  "author": "waeterr",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/waeterr/genrex.git"
+  },
+  "keywords": [
+    "cli",
+    "scaffolding",
+    "blueprint",
+    "generator",
+    "typescript",
+    "fastify",
+    "vitest",
+    "biome"
+  ],
   "bin": {
     "genrex": "./dist/src/index.js"
   },
+  "files": [
+    "dist/src"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "start": "node dist/src/index.js",
-    "test": "npm run build && node --test dist/tests/**/*.test.js"
+    "test": "npm run build && node --test dist/tests/**/*.test.js",
+    "prepublishOnly": "npm run check && npm test"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

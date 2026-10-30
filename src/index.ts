@@ -8,7 +8,7 @@ const [command, ...args] = process.argv.slice(2);
 
 switch (command) {
   case "create":
-    runCreate(args);
+    await runCreate(args);
     break;
   case "list":
     listBlueprints();
@@ -26,7 +26,7 @@ switch (command) {
     break;
   case "--version":
   case "-v":
-    console.log("0.1.0");
+    console.log("0.2.0");
     break;
   default:
     console.error(`Unknown command: ${command}`);
@@ -34,18 +34,22 @@ switch (command) {
     process.exitCode = 1;
 }
 
-function runCreate(args: string[]): void {
-  const [name, ...flags] = args;
+async function runCreate(args: string[]): Promise<void> {
+  const [firstArg, ...flags] = args;
+  let name = firstArg?.startsWith("-") ? undefined : firstArg;
+  const allFlags = firstArg?.startsWith("-") ? [firstArg, ...flags] : flags;
+
   const options: CreateOptions = {
     dryRun: false,
     skipInstall: false,
     git: false,
     githubActions: false,
     docker: false,
+    interactive: false,
   };
 
-  for (let index = 0; index < flags.length; index += 1) {
-    const flag = flags[index];
+  for (let index = 0; index < allFlags.length; index += 1) {
+    const flag = allFlags[index];
     if (flag === "--dry-run") {
       options.dryRun = true;
     } else if (flag === "--skip-install") {
@@ -56,10 +60,12 @@ function runCreate(args: string[]): void {
       options.githubActions = true;
     } else if (flag === "--docker") {
       options.docker = true;
+    } else if (flag === "-i" || flag === "--interactive") {
+      options.interactive = true;
     } else if (flag === "--blueprint") {
-      options.blueprint = flags[++index];
+      options.blueprint = allFlags[++index];
     } else if (flag === "--package-manager") {
-      const packageManager = flags[++index];
+      const packageManager = allFlags[++index];
       if (!["npm", "pnpm", "yarn", "bun"].includes(packageManager)) {
         console.error(`Error: Unsupported package manager '${packageManager}'.`);
         process.exitCode = 1;
@@ -73,7 +79,7 @@ function runCreate(args: string[]): void {
     }
   }
 
-  createProject(name, options);
+  await createProject(name, options);
 }
 
 function listBlueprints(): void {
@@ -115,19 +121,20 @@ Usage:
   genrex <command> [options]
 
 Commands:
+  create [name]                     Create a project (interactive wizard by default)
   list                              List available blueprints
   info <name>                       Show blueprint details
-  create <name> --dry-run           Preview project generation
   doctor                            Check local environment
 
 Create options:
-  --blueprint <id>                  Blueprint ID (default: ts-cli)
+  -i, --interactive                 Launch interactive prompt wizard
+  --blueprint <id>                  Blueprint ID (ts-cli, node-api, ts-lib)
   --package-manager <manager>       npm, pnpm, yarn, or bun (default: pnpm)
-  --dry-run                         Preview without filesystem changes
-  --skip-install                    Do not install dependencies
   --git                             Initialize a Git repository
   --github-actions                  Generate GitHub Actions CI workflow
   --docker                          Generate Dockerfile & .dockerignore
+  --dry-run                         Preview without filesystem changes
+  --skip-install                    Do not install dependencies
 
 Options:
   -h, --help                        Show help
