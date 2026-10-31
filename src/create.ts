@@ -36,7 +36,11 @@ export async function createProject(name: string | undefined, options: CreateOpt
   let targetCi = options.githubActions;
   let targetDocker = options.docker;
 
-  if ((!targetName || options.interactive) && process.stdin.isTTY) {
+  const shouldPrompt =
+    Boolean(process.stdin.isTTY) &&
+    (!targetName || options.interactive || (!options.blueprint && !options.dryRun));
+
+  if (shouldPrompt) {
     const answers = await promptWizard(targetName);
     targetName = answers.name;
     targetBlueprint = answers.blueprint;

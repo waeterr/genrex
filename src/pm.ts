@@ -8,6 +8,6 @@ export function installDependencies(pm: PackageManager, cwd: string): void {
   execFileSync(cmd, ["install"], {
     cwd,
     stdio: "inherit",
-    shell: false,
+    shell: isWindows,
   });
 }

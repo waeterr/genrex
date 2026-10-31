@@ -19,11 +19,15 @@ export async function promptWizard(initialName?: string): Promise<WizardResult> 
     console.log("\ngenrex — Project Blueprint Engine\n");
 
     let name = initialName;
-    while (!name || name.trim() === "") {
-      const answer = await rl.question("? Project name: ");
-      name = answer.trim();
-      if (!name) {
-        console.log("  Project name cannot be empty.");
+    if (name) {
+      console.log(`? Project name: ${name}`);
+    } else {
+      while (!name || name.trim() === "") {
+        const answer = await rl.question("? Project name: ");
+        name = answer.trim();
+        if (!name) {
+          console.log("  Project name cannot be empty.");
+        }
       }
     }
 

@@ -26,7 +26,7 @@ switch (command) {
     break;
   case "--version":
   case "-v":
-    console.log("0.2.0");
+    console.log("0.2.1");
     break;
   default:
     console.error(`Unknown command: ${command}`);
