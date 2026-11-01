@@ -23,7 +23,9 @@
     "genrex": "./dist/src/index.js"
   },
   "files": [
-    "dist/src"
+    "dist/src",
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
