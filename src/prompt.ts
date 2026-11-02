@@ -12,8 +12,18 @@ export interface WizardResult {
   docker: boolean;
 }
 
-export async function promptWizard(initialName?: string): Promise<WizardResult> {
-  const rl = createInterface({ input: stdin, output: stdout });
+export async function promptWizard(
+  initialName?: string,
+  input: NodeJS.ReadableStream = stdin,
+  output: NodeJS.WritableStream = stdout,
+): Promise<WizardResult> {
+  const rl = createInterface({ input, output });
+  const onSigint = () => {
+    rl.close();
+    console.log("\nOperation cancelled.");
+    process.exit(0);
+  };
+  rl.once("SIGINT", onSigint);
 
   try {
     console.log("\ngenrex — Project Blueprint Engine\n");
@@ -66,7 +76,13 @@ export async function promptWizard(initialName?: string): Promise<WizardResult> 
       githubActions,
       docker,
     };
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === "AbortError") {
+      process.exit(0);
+    }
+    throw err;
   } finally {
+    rl.removeListener("SIGINT", onSigint);
     rl.close();
   }
 }
