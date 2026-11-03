@@ -2,6 +2,7 @@ import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { blueprints } from "./blueprints.js";
 import type { PackageManager } from "./config.js";
+import { detectAvailablePackageManagers } from "./pm-detect.js";
 
 export interface WizardResult {
   name: string;
@@ -49,14 +50,22 @@ export async function promptWizard(
     const bpIndex = Number.parseInt(bpChoice.trim() || "1", 10) - 1;
     const blueprint = (blueprints[bpIndex] ?? blueprints[0]).id;
 
-    const pms: PackageManager[] = ["pnpm", "npm", "yarn", "bun"];
+    const availablePms = detectAvailablePackageManagers();
+    const allPms: PackageManager[] = ["pnpm", "npm", "yarn", "bun"];
+    const orderedPms = [
+      ...availablePms,
+      ...allPms.filter((pm) => !availablePms.includes(pm)),
+    ];
+
     console.log("\n? Package manager:");
-    pms.forEach((pm, i) => {
-      console.log(`  ${i + 1}) ${pm}`);
+    orderedPms.forEach((pm, i) => {
+      const isDetected = availablePms.includes(pm);
+      const tag = isDetected ? (i === 0 ? " (detected, default)" : " (detected)") : "";
+      console.log(`  ${i + 1}) ${pm}${tag}`);
     });
-    const pmChoice = await rl.question(`Select [1-${pms.length}] (1): `);
+    const pmChoice = await rl.question(`Select [1-${orderedPms.length}] (1): `);
     const pmIndex = Number.parseInt(pmChoice.trim() || "1", 10) - 1;
-    const packageManager = pms[pmIndex] ?? "pnpm";
+    const packageManager = orderedPms[pmIndex] ?? orderedPms[0];
 
     const gitAns = await rl.question("\n? Initialize Git? (Y/n): ");
     const git = gitAns.trim().toLowerCase() !== "n";
